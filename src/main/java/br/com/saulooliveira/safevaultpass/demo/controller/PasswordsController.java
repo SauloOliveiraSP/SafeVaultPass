@@ -1,11 +1,14 @@
 package br.com.saulooliveira.safevaultpass.demo.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,14 +30,32 @@ public class PasswordsController {
         return passwordsService.list();
     }
 
-    @PostMapping
-    public List<PasswordsEntity> create(PasswordsEntity password) {
-        return  passwordsService.create(password);
+    @GetMapping("/user/{userId}")
+    public List<PasswordsEntity> listByIdUser(@PathVariable Long userId) {
+        return passwordsService.listByIdUser(userId);
     }
 
-    @PostMapping("/{userId}")
-    public ResponseEntity<PasswordsEntity> createPassword(@PathVariable Long userId, @RequestBody PasswordsEntity password) {
+    @GetMapping("/{id}")
+    public ResponseEntity<PasswordsEntity> getById(@PathVariable Long id) {
+        PasswordsEntity password =  passwordsService.getById(id);
+        return ResponseEntity.ok(password);
+    }
+
+    @PostMapping("/user/{userId}")
+    public ResponseEntity<PasswordsEntity> create(@PathVariable Long userId, @RequestBody PasswordsEntity password) {
         PasswordsEntity createdPassword = passwordsService.create(userId, password);
         return ResponseEntity.ok(createdPassword);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PasswordsEntity> update(@PathVariable Long id, @RequestBody PasswordsEntity password) {
+        PasswordsEntity createdPassword = passwordsService.update(id, password);
+        return ResponseEntity.ok(createdPassword);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
+        Map<String, String> response = passwordsService.delete(id);
+        return ResponseEntity.ok(response);
     }
 }
