@@ -13,6 +13,7 @@ import br.com.saulooliveira.safevaultpass.demo.repository.UsersRepository;
 
 @Service
 public class PasswordsService {
+
     private final PasswordsRepository passwordsRepository;
     private final UsersRepository usersRepository;
 
@@ -21,61 +22,52 @@ public class PasswordsService {
         this.usersRepository = usersRepository;
     }
 
-    //Listar todas as senhas
-    public List<PasswordsEntity> list() {
-        return passwordsRepository.findAll();
+    // Lista senhas do usuário autenticado
+    public List<PasswordsEntity> listByUserId(Long userId) {
+        return passwordsRepository.findByUserId(userId); // Filtra as senhas pelo userId
     }
 
-    //Listar todas as senhas
-    public List<PasswordsEntity> listByIdUser(Long userId) {
-        // Verifica se o usuário existe
-        usersRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + userId));
-
-        // Retorna as senhas associadas ao usuário
-        return passwordsRepository.findByUserId(userId);
-    }
-
-    //Busca senha por ID
-    public PasswordsEntity getById(Long id) {
-        return passwordsRepository.findById(id)
+    // Busca uma senha por ID, garantindo que a senha pertença ao usuário logado
+    public PasswordsEntity getByIdAndUser(Long id, Long userId) {
+        PasswordsEntity password = passwordsRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Senha com ID " + id + " não encontrada."));
+        if (!password.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Essa senha não pertence ao usuário logado.");
+        }
+        return password;
     }
 
-    // Criar Senha por usuário
+    // Cria uma nova senha para o usuário logado
     public PasswordsEntity create(Long userId, PasswordsEntity password) {
         UsersEntity user = usersRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + userId));
-
         password.setUser(user);
-
         return passwordsRepository.save(password);
     }
 
-    // Alterar Senha por ID
-    public PasswordsEntity update(Long id, PasswordsEntity password) {
-        PasswordsEntity existingPasswords = passwordsRepository.findById(id)
+    // Atualiza a senha, garantindo que ela pertença ao usuário logado
+    public PasswordsEntity update(Long id, PasswordsEntity password, Long userId) {
+        PasswordsEntity existingPassword = passwordsRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Senha com ID " + id + " não encontrada."));
-
-        // Atualiza os campos
-        existingPasswords.setService(password.getService());
-        existingPasswords.setLogin(password.getLogin());
-        existingPasswords.setPassword(password.getPassword());
-
-        return passwordsRepository.save(existingPasswords);
+        if (!existingPassword.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Essa senha não pertence ao usuário logado.");
+        }
+        existingPassword.setService(password.getService());
+        existingPassword.setLogin(password.getLogin());
+        existingPassword.setPassword(password.getPassword());
+        return passwordsRepository.save(existingPassword);
     }
 
-    // Deletar Senha por ID
-    public Map<String, String> delete(Long id) {
-        PasswordsEntity existingPasswords = passwordsRepository.findById(id)
+    // Deleta a senha, garantindo que ela pertença ao usuário logado
+    public Map<String, String> delete(Long id, Long userId) {
+        PasswordsEntity password = passwordsRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Senha com ID " + id + " não encontrada."));
-
-        passwordsRepository.delete(existingPasswords);
-
-         // Retorna uma mensagem de confirmação
+        if (!password.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Essa senha não pertence ao usuário logado.");
+        }
+        passwordsRepository.delete(password);
         Map<String, String> response = new HashMap<>();
         response.put("message", "Senha com ID " + id + " removida com sucesso.");
         return response;
     }
-
 }
