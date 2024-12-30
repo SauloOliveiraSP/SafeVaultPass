@@ -20,7 +20,7 @@ import br.com.saulooliveira.safevaultpass.demo.service.PasswordsService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/passwords")
+@RequestMapping("/api/v1/passwords")
 @RequiredArgsConstructor
 public class PasswordsController {
 

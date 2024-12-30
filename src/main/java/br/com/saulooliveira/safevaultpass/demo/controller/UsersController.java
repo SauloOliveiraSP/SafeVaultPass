@@ -16,7 +16,7 @@ import br.com.saulooliveira.safevaultpass.demo.entity.UsersEntity;
 import br.com.saulooliveira.safevaultpass.demo.service.UsersService;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 public class UsersController {
     private final UsersService usersService;
 
