@@ -41,7 +41,14 @@ public class PasswordsService {
     public PasswordsEntity create(Long userId, PasswordsEntity password) {
         UsersEntity user = usersRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + userId));
+
         password.setUser(user);
+
+        if (password.getId() != null) {
+            passwordsRepository.findById(password.getId())
+                .orElseThrow(() -> new RuntimeException("Senha não encontrada para atualização."));
+        }
+
         return passwordsRepository.save(password);
     }
 
@@ -52,7 +59,6 @@ public class PasswordsService {
         if (!existingPassword.getUser().getId().equals(userId)) {
             throw new RuntimeException("Essa senha não pertence ao usuário logado.");
         }
-        existingPassword.setService(password.getService());
         existingPassword.setLogin(password.getLogin());
         existingPassword.setPassword(password.getPassword());
         return passwordsRepository.save(existingPassword);

@@ -75,13 +75,21 @@ public class JwtService {
 
     // Método para extrair o userId do token
     public Long extractUserId(String token) {
-        // Extraímos o "id" do token, que foi configurado no método generateToken
-        return Jwts.parserBuilder()
-                .setSigningKey(getSignKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("id", Long.class);  // Retorna o ID do usuário armazenado no token
+        try {
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+    
+            // Extraímos o "id" do token, que foi configurado no método generateToken
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSignKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("id", Long.class);    
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid or expired token", e);
+        }
     }
 
     // Método para gerar a chave secreta
